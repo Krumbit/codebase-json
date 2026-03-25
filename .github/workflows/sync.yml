@@ -1,0 +1,73 @@
+# On push, refresh map.json for changed Python files and commit if updated.
+# Default GITHUB_TOKEN can push to the same repo unless branch protection blocks it.
+# If pushes fail, add a PAT with contents:write or adjust protection rules.
+
+name: sync-map
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: pip install .
+
+      - name: Collect changed Python files
+        id: files
+        run: |
+          set -e
+          if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+            git diff --name-only HEAD~1 HEAD --diff-filter=ACMRT | grep '\.py$' > changed.txt || true
+          else
+            git ls-files '*.py' > changed.txt || true
+          fi
+          if [ ! -s changed.txt ]; then
+            echo "No Python file changes in this push."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "Changed:"
+          cat changed.txt
+
+      - name: Init or update map
+        if: steps.files.outputs.skip != 'true'
+        run: |
+          set -e
+          if [ ! -f map.json ]; then
+            codebase init --repo-root .
+          fi
+          paths=()
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            paths+=("$line")
+          done < changed.txt
+          codebase update --repo-root . --map map.json -- "${paths[@]}"
+
+      - name: Commit map.json if changed
+        if: steps.files.outputs.skip != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add map.json
+          if git diff --staged --quiet; then
+            echo "No map.json changes."
+            exit 0
+          fi
+          git commit -m "chore: sync map.json from Agent-LUT"
+          git push

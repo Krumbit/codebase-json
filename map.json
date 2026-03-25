@@ -1,0 +1,336 @@
+{
+  "keywords": {
+    "_default_map_path": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/cli.py"
+      ]
+    },
+    "_paths_from_keyword_value": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/store.py"
+      ]
+    },
+    "add_anthropic_usage": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/metrics.py"
+      ]
+    },
+    "add_openai_usage": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/metrics.py"
+      ]
+    },
+    "bar": {
+      "weight": 1,
+      "paths": [
+        "tests/test_indexer.py"
+      ]
+    },
+    "baz": {
+      "weight": 1,
+      "paths": [
+        "tests/test_indexer.py"
+      ]
+    },
+    "build_index_for_files": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/indexer.py"
+      ]
+    },
+    "build_parser": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/cli.py"
+      ]
+    },
+    "cleanup_paths_from_keywords": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/sync.py"
+      ]
+    },
+    "cmd_agent": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/cli.py"
+      ]
+    },
+    "cmd_dump": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/cli.py"
+      ]
+    },
+    "cmd_init": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/cli.py"
+      ]
+    },
+    "cmd_lookup": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/cli.py"
+      ]
+    },
+    "cmd_update": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/cli.py"
+      ]
+    },
+    "default_metadata": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/store.py"
+      ]
+    },
+    "extract_symbols_from_file": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/indexer.py"
+      ]
+    },
+    "extract_symbols_from_source": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/indexer.py"
+      ]
+    },
+    "foo": {
+      "weight": 1,
+      "paths": [
+        "tests/test_indexer.py"
+      ]
+    },
+    "format_metrics_report": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/metrics.py"
+      ]
+    },
+    "inner": {
+      "weight": 1,
+      "paths": [
+        "tests/test_indexer.py"
+      ]
+    },
+    "iter_python_files": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/indexer.py"
+      ]
+    },
+    "keywords_to_sorted_lists": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/store.py"
+      ]
+    },
+    "load_gitignore_spec": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/indexer.py"
+      ]
+    },
+    "load_map": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/store.py"
+      ]
+    },
+    "main": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/cli.py"
+      ]
+    },
+    "merge_keyword_maps": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/indexer.py"
+      ]
+    },
+    "normalize_changed_paths": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/sync.py"
+      ]
+    },
+    "path_to_repo_relative": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/indexer.py"
+      ]
+    },
+    "record_baseline_n_file_reads": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/metrics.py"
+      ]
+    },
+    "run_agent": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/agent_runner.py"
+      ]
+    },
+    "run_agent_anthropic": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/agent_runner.py"
+      ]
+    },
+    "run_agent_openai": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/agent_runner.py"
+      ]
+    },
+    "run_cli": {
+      "weight": 1,
+      "paths": [
+        "tests/test_cli.py"
+      ]
+    },
+    "run_lookup_files": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/tools.py"
+      ]
+    },
+    "runmetrics": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/metrics.py"
+      ]
+    },
+    "save_map": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/store.py"
+      ]
+    },
+    "sets_from_lists": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/store.py"
+      ]
+    },
+    "test_build_index_for_files": {
+      "weight": 1,
+      "paths": [
+        "tests/test_indexer.py"
+      ]
+    },
+    "test_cleanup_removes_paths": {
+      "weight": 1,
+      "paths": [
+        "tests/test_sync.py"
+      ]
+    },
+    "test_extract_classes_and_defs": {
+      "weight": 1,
+      "paths": [
+        "tests/test_indexer.py"
+      ]
+    },
+    "test_extract_from_file": {
+      "weight": 1,
+      "paths": [
+        "tests/test_indexer.py"
+      ]
+    },
+    "test_init_lookup_dump": {
+      "weight": 1,
+      "paths": [
+        "tests/test_cli.py"
+      ]
+    },
+    "test_load_legacy_list_format": {
+      "weight": 1,
+      "paths": [
+        "tests/test_store.py"
+      ]
+    },
+    "test_load_weighted_format": {
+      "weight": 1,
+      "paths": [
+        "tests/test_store.py"
+      ]
+    },
+    "test_save_roundtrip_order": {
+      "weight": 1,
+      "paths": [
+        "tests/test_store.py"
+      ]
+    },
+    "test_skips_comment_line": {
+      "weight": 1,
+      "paths": [
+        "tests/test_indexer.py"
+      ]
+    },
+    "test_update_changes_index": {
+      "weight": 1,
+      "paths": [
+        "tests/test_cli.py"
+      ]
+    },
+    "test_update_reindexes_after_edit": {
+      "weight": 1,
+      "paths": [
+        "tests/test_sync.py"
+      ]
+    },
+    "test_update_removes_missing_file_from_index": {
+      "weight": 1,
+      "paths": [
+        "tests/test_sync.py"
+      ]
+    },
+    "test_weighted_keywords_order": {
+      "weight": 1,
+      "paths": [
+        "tests/test_store.py"
+      ]
+    },
+    "update_index": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/sync.py"
+      ]
+    },
+    "usagetotals": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/metrics.py"
+      ]
+    },
+    "weighted_keywords_for_json": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/store.py"
+      ]
+    },
+    "write_json_atomic": {
+      "weight": 1,
+      "paths": [
+        "src/agent_lut/store.py"
+      ]
+    }
+  },
+  "metadata": {
+    "last_sync": "2026-03-25T17:26:57Z",
+    "repo_path": "/Users/w3joe/Documents/projects/codebase-md",
+    "stats": {
+      "total_keywords": 54,
+      "total_files": 11
+    }
+  }
+}
