@@ -31,34 +31,24 @@ replaces an entire search session.
 
 Every time you need to discover which files to open, follow this sequence:
 
-### Step 1: Check for the index
+### Step 1: Check for the CLI
 
-Look for `map.json` in the repository root. Common locations to check, in
-order:
-
-```
-./map.json
-./.agent-lut/map.json
-./codebase/map.json
-```
-
-Run a quick check:
+Verify the `codebase` CLI is available:
 
 ```bash
-# Fast existence check — don't cat the whole file yet
-find . -maxdepth 2 -name "map.json" -path "*agent*" -o -name "map.json" 2>/dev/null | head -5
+command -v codebase || python3 scripts/codebase.py --help 2>/dev/null
 ```
 
-If you've already confirmed the index exists earlier in this conversation,
-skip straight to Step 2. No need to re-check every time.
+If you've already confirmed it exists earlier in this conversation, skip
+straight to Step 2. No need to re-check every time.
 
-**If no index is found:** Tell the user briefly that an Agent-LUT index
-would speed up navigation, then fall back to your normal search methods
-(grep, find, etc.) and continue with the task. Don't block on this — just
-mention it once and move on. Example:
+**If the CLI is not found:** Tell the user briefly that Agent-LUT would
+speed up navigation, then fall back to your normal search methods (grep,
+find, etc.) and continue with the task. Don't block on this — just mention
+it once and move on. Example:
 
-> "I didn't find an Agent-LUT index in this repo. You can set one up with
-> `codebase init` to speed up future lookups. For now, I'll search normally."
+> "This repo doesn't have the Agent-LUT CLI set up. You can install it to
+> speed up future lookups. For now, I'll search normally."
 
 ### Step 2: Extract keywords from the prompt
 
@@ -77,41 +67,20 @@ sharper results than `config`.
 
 ### Step 3: Query the index
 
-Use the CLI if available:
+Run a lookup for each keyword:
 
 ```bash
 codebase lookup <keyword>
 ```
 
-If the `codebase` CLI is not installed but `map.json` exists, query it
-directly with a lightweight command:
+Or if the CLI is installed as a Python script in the repo:
 
 ```bash
-# Single keyword lookup
-python3 -c "
-import json, sys
-m = json.load(open('map.json'))
-kw = sys.argv[1].lower()
-hits = m.get('keywords', {}).get(kw, [])
-print('\n'.join(hits) if hits else f'No results for: {kw}')
-" "<keyword>"
+python3 scripts/codebase.py lookup <keyword>
 ```
 
-For multiple keywords in one shot:
-
-```bash
-python3 -c "
-import json, sys
-m = json.load(open('map.json'))
-kws = sys.argv[1:]
-seen = set()
-for kw in kws:
-    for f in m.get('keywords', {}).get(kw.lower(), []):
-        if f not in seen:
-            seen.add(f)
-            print(f)
-" keyword1 keyword2 keyword3
-```
+Run one lookup per keyword. Each call returns a list of file paths — collect
+them all and deduplicate before opening anything.
 
 ### Step 4: Use the results
 
@@ -131,19 +100,7 @@ codebase before diving in, check the top keywords:
 
 ```bash
 codebase dump
-```
-
-Or manually:
-
-```bash
-python3 -c "
-import json
-m = json.load(open('map.json'))
-kws = m.get('keywords', {})
-top = sorted(kws.items(), key=lambda x: len(x[1]), reverse=True)[:20]
-for k, v in top:
-    print(f'{k}: {len(v)} files')
-"
+# or: python3 scripts/codebase.py dump
 ```
 
 This gives you a "menu" of what the index knows about — useful for picking
