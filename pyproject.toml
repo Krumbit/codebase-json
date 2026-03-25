@@ -21,6 +21,9 @@ dependencies = [
 dev = [
     "pytest>=8.3.0",
 ]
+demo = [
+    "flask>=3.0.0",
+]
 
 [project.scripts]
 codebase = "agent_lut.cli:main"

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent-LUT · Live benchmark</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a222c;
+      --border: #2a3544;
+      --text: #e8edf4;
+      --muted: #8b9cb3;
+      --naive: #e07a5f;
+      --lut: #2ec4b6;
+      --accent: #f4d35e;
+      --radius: 12px;
+      --font-sans: "DM Sans", system-ui, sans-serif;
+      --font-display: "Instrument Serif", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-sans);
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(46, 196, 182, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 50%, rgba(224, 122, 95, 0.08), transparent),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    header {
+      margin-bottom: 2rem;
+    }
+    header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 4vw, 2.35rem);
+      font-weight: 400;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .map-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .map-card h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+      font-weight: 600;
+    }
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+    .map-stat strong {
+      display: block;
+      font-size: 1.35rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+    }
+    .map-stat span { font-size: 0.8rem; color: var(--muted); }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .controls label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .controls input[type="number"] {
+      width: 4rem;
+      padding: 0.45rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+    }
+    button.primary {
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.55rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--lut), #1fa89d);
+      color: #0a1210;
+    }
+    button.primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .lanes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 640px) { .lanes { grid-template-columns: 1fr; } }
+
+    .lane {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1rem 1.15rem;
+      background: rgba(26, 34, 44, 0.6);
+    }
+    .lane.naive { border-top: 3px solid var(--naive); }
+    .lane.lut { border-top: 3px solid var(--lut); }
+    .lane h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .lane h3 .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .lane.naive h3 .dot { background: var(--naive); }
+    .lane.lut h3 .dot { background: var(--lut); }
+    .lane .status {
+      font-size: 0.8rem;
+      color: var(--muted);
+      min-height: 1.25em;
+    }
+    .lane .status.running { color: var(--accent); }
+
+    .log {
+      font-family: ui-monospace, "Cascadia Code", monospace;
+      font-size: 0.78rem;
+      background: #0a0e12;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      max-height: 220px;
+      overflow-y: auto;
+      margin-bottom: 1.5rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #b8c5d6;
+    }
+    .log .naive { color: #f5b5a5; }
+    .log .lut { color: #7ee8de; }
+
+    table.results {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    table.results th,
+    table.results td {
+      padding: 0.65rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    table.results th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    table.results td.num { font-variant-numeric: tabular-nums; }
+    table.results .delta-pos { color: var(--lut); }
+    table.results .muted { color: var(--muted); font-size: 0.85rem; }
+
+    .summary {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius);
+      background: linear-gradient(90deg, rgba(46, 196, 182, 0.12), rgba(244, 211, 94, 0.08));
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+    .summary strong { color: var(--accent); }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Agent battle · live run</h1>
+      <p>Simulated naive search vs LUT path. Map footprint uses your real repo and <code>map.json</code>.</p>
+    </header>
+
+    <section class="map-card" id="map-card">
+      <h2>Index footprint</h2>
+      <p class="muted" id="map-loading">Loading map stats…</p>
+      <div class="map-grid" id="map-grid" hidden>
+        <div class="map-stat"><strong id="m-pct">—</strong><span>Map vs codebase (tokens)</span></div>
+        <div class="map-stat"><strong id="m-map">—</strong><span>map.json tokens</span></div>
+        <div class="map-stat"><strong id="m-code">—</strong><span>All .py tokens (est.)</span></div>
+        <div class="map-stat"><strong id="m-files">—</strong><span>Python files indexed</span></div>
+      </div>
+    </section>
+
+    <div class="controls">
+      <label>Naive “wrong file” depth <input type="number" id="depth" value="5" min="1" max="20" /></label>
+      <button type="button" class="primary" id="run">Run benchmark</button>
+    </div>
+
+    <div class="lanes">
+      <div class="lane naive">
+        <h3><span class="dot"></span> Naive agent</h3>
+        <div class="status" id="status-naive">Idle</div>
+      </div>
+      <div class="lane lut">
+        <h3><span class="dot"></span> LUT agent</h3>
+        <div class="status" id="status-lut">Idle</div>
+      </div>
+    </div>
+
+    <div class="log" id="log"></div>
+
+    <section id="results-section" hidden>
+      <h2 style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin:0 0 0.75rem;">Results</h2>
+      <table class="results">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th class="num">Naive</th>
+            <th class="num">LUT</th>
+            <th class="num">Delta</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="summary" id="summary"></div>
+    </section>
+
+    <footer>
+      Demo server only · bind 127.0.0.1 · token totals for naive/LUT are modeled (see plan); map size is measured from disk.
+    </footer>
+  </div>
+
+  <script>
+    const fmt = (n) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const fmtPct = (n) => n.toFixed(1) + "%";
+    const $ = (id) => document.getElementById(id);
+
+    function loadMapStats() {
+      fetch("/api/map-stats")
+        .then((r) => r.json())
+        .then((d) => {
+          $("map-loading").hidden = true;
+          $("map-grid").hidden = false;
+          if (d.error) {
+            $("map-loading").hidden = false;
+            $("map-loading").textContent = "Map stats error: " + d.error;
+            $("map-grid").hidden = true;
+            return;
+          }
+          $("m-pct").textContent = fmtPct(d.map_pct_of_codebase);
+          $("m-map").textContent = fmt(d.map_tokens);
+          $("m-code").textContent = fmt(d.codebase_tokens);
+          $("m-files").textContent = fmt(d.py_file_count);
+        })
+        .catch((e) => {
+          $("map-loading").textContent = "Could not load map stats: " + e;
+        });
+    }
+
+    function appendLog(line, phase) {
+      const el = $("log");
+      const span = document.createElement("span");
+      span.className = phase || "";
+      span.textContent = line + "\n";
+      el.appendChild(span);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function setPhase(phase, status, metrics) {
+      const id = phase === "naive" ? "status-naive" : "status-lut";
+      const el = $(id);
+      el.classList.toggle("running", status === "running");
+      if (status === "running") el.textContent = "Running…";
+      else if (status === "done" && metrics) {
+        el.textContent =
+          fmt(metrics.tokens_total) + " tok · " + metrics.steps + " steps · " + metrics.latency_s + "s";
+      } else el.textContent = "Idle";
+    }
+
+    function fillTable(naive, lut, delta) {
+      const inSave =
+        naive.tokens_in > 0 ? ((naive.tokens_in - lut.tokens_in) / naive.tokens_in) * 100 : 0;
+      const outSave =
+        naive.tokens_out > 0 ? ((naive.tokens_out - lut.tokens_out) / naive.tokens_out) * 100 : 0;
+      const stepSave =
+        delta.steps_naive > 0
+          ? ((delta.steps_naive - delta.steps_lut) / delta.steps_naive) * 100
+          : 0;
+      const costSave =
+        naive.estimated_cost_usd > 0
+          ? ((naive.estimated_cost_usd - lut.estimated_cost_usd) / naive.estimated_cost_usd) * 100
+          : 0;
+      const rows = [
+        ["Tokens in (context)", naive.tokens_in, lut.tokens_in, "−" + inSave.toFixed(1) + "%"],
+        ["Tokens out (reasoning)", naive.tokens_out, lut.tokens_out, "−" + outSave.toFixed(1) + "%"],
+        ["Tokens total (modeled)", naive.tokens_total, lut.tokens_total, "−" + fmtPct(delta.token_savings_pct)],
+        ["Steps / round-trips", naive.steps, lut.steps, "−" + stepSave.toFixed(1) + "%"],
+        ["Wall time (simulated)", naive.latency_s + "s", lut.latency_s + "s", "~" + delta.speed_boost + "× faster"],
+        [
+          "Est. cost (demo rates)",
+          "$" + naive.estimated_cost_usd,
+          "$" + lut.estimated_cost_usd,
+          "−" + costSave.toFixed(1) + "%",
+        ],
+      ];
+      const tb = $("tbody");
+      tb.innerHTML = "";
+      for (const [a, b, c, d] of rows) {
+        const tr = document.createElement("tr");
+        const isDelta = d.includes("−") || d.includes("×");
+        tr.innerHTML =
+          "<td>" +
+          a +
+          "</td><td class='num'>" +
+          (typeof b === "number" ? fmt(b) : b) +
+          "</td><td class='num'>" +
+          (typeof c === "number" ? fmt(c) : c) +
+          "</td><td class='num " +
+          (isDelta ? "delta-pos" : "muted") +
+          "'>" +
+          d +
+          "</td>";
+        tb.appendChild(tr);
+      }
+      $("summary").innerHTML =
+        "Modeled totals: <strong>" +
+        fmtPct(delta.token_savings_pct) +
+        "</strong> fewer tokens, <strong>~" +
+        delta.speed_boost +
+        "×</strong> faster wall time on this run. Map footprint above is measured from your repo.";
+      $("results-section").hidden = false;
+    }
+
+      $("run").addEventListener("click", () => {
+      const depth = Math.min(20, Math.max(1, parseInt($("depth").value, 10) || 5));
+      $("depth").value = String(depth);
+      $("run").disabled = true;
+      $("log").innerHTML = "";
+      $("results-section").hidden = true;
+      $("status-naive").textContent = "Idle";
+      $("status-lut").textContent = "Idle";
+      $("status-naive").classList.remove("running");
+      $("status-lut").classList.remove("running");
+
+      const url = "/api/benchmark/stream?depth=" + encodeURIComponent(depth) + "&map=1";
+      const es = new EventSource(url);
+
+      es.onmessage = (ev) => {
+        let msg;
+        try {
+          msg = JSON.parse(ev.data);
+        } catch {
+          return;
+        }
+        if (msg.type === "log") appendLog(msg.line, msg.phase);
+        if (msg.type === "phase") {
+          setPhase(msg.phase, msg.status, msg.metrics);
+        }
+        if (msg.type === "complete") {
+          es.close();
+          $("run").disabled = false;
+          fillTable(msg.naive, msg.lut, msg.delta);
+        }
+      };
+
+      es.onerror = () => {
+        es.close();
+        $("run").disabled = false;
+        appendLog("[Stream error — check server console]", null);
+      };
+    });
+
+    loadMapStats();
+  </script>
+</body>
+</html>
