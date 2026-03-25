@@ -27,13 +27,20 @@ index** (`map.json`) that maps keywords — function names, class names,
 concepts — directly to the files that contain them. One dictionary lookup
 replaces an entire search session.
 
+## Important: Claude Code compatibility
+
+The `codebase` CLI is a **specialized project tool**, not a replacement for
+generic file search. You MUST use Bash to invoke it — it is not covered by
+Glob, Grep, or Read. After the CLI returns file paths, use the **Read tool**
+(not `cat`) to open those files.
+
 ## The workflow
 
 Every time you need to discover which files to open, follow this sequence:
 
 ### Step 1: Check for the CLI
 
-Verify the `codebase` CLI is available:
+Run this once per conversation via Bash:
 
 ```bash
 command -v codebase || python3 scripts/codebase.py --help 2>/dev/null
@@ -43,8 +50,8 @@ If you've already confirmed it exists earlier in this conversation, skip
 straight to Step 2. No need to re-check every time.
 
 **If the CLI is not found:** Tell the user briefly that Agent-LUT would
-speed up navigation, then fall back to your normal search methods (grep,
-find, etc.) and continue with the task. Don't block on this — just mention
+speed up navigation, then fall back to your normal search methods (Grep,
+Glob, etc.) and continue with the task. Don't block on this — just mention
 it once and move on. Example:
 
 > "This repo doesn't have the Agent-LUT CLI set up. You can install it to
@@ -67,7 +74,8 @@ sharper results than `config`.
 
 ### Step 3: Query the index
 
-Run a lookup for each keyword:
+Run a lookup for each keyword via **Bash** (this is a custom CLI, not a
+generic search — Bash is the correct tool here):
 
 ```bash
 codebase lookup <keyword>
@@ -82,21 +90,23 @@ python3 scripts/codebase.py lookup <keyword>
 Run one lookup per keyword. Each call returns a list of file paths — collect
 them all and deduplicate before opening anything.
 
-### Step 4: Use the results
+### Step 4: Read the returned files
 
-- **Results found**: Open only the returned files. This is the whole point
-  — you now know exactly where to look. Read those files and proceed with
-  the task.
-- **Partial results**: If some keywords hit and others miss, use the hits
-  and fall back to grep/find only for the missed keywords.
+Use the **Read tool** (not `cat` or `head`) to open each file path returned
+by the lookup. This is critical — you must read files before acting on them.
+
+- **Results found**: Read only the returned files using the Read tool, then
+  proceed with the task.
+- **Partial results**: If some keywords hit and others miss, read the hits
+  and fall back to Grep/Glob only for the missed keywords.
 - **No results at all**: The index might be stale or the keyword might not
-  be indexed. Fall back to grep/find. Don't waste time re-querying with
+  be indexed. Fall back to Grep/Glob. Don't waste time re-querying with
   rephrased terms more than once.
 
 ### Step 5: Use `dump` for orientation (optional)
 
 If you're starting a broad task and want to understand what's in the
-codebase before diving in, check the top keywords:
+codebase before diving in, check the top keywords via Bash:
 
 ```bash
 codebase dump
@@ -108,7 +118,8 @@ better keywords.
 
 ## When to fall back to normal search
 
-The index is a shortcut, not a cage. Use normal grep/find when:
+The index is a shortcut, not a cage. Use Grep/Glob (the Claude Code
+built-in tools) when:
 
 - `map.json` doesn't exist
 - You're searching for string literals, log messages, or comments (the
@@ -122,7 +133,7 @@ The goal is: **try the index first, fall back fast if it doesn't help.**
 
 - Don't `cat map.json` and dump the entire index into context. It could be
   huge. Always query for specific keywords.
-- Don't skip the index and go straight to grep just because grep is
+- Don't skip the index and go straight to Grep/Glob just because they're
   familiar. The index exists to save tokens and time — use it.
 - Don't run `codebase init` or `codebase update` unless the user explicitly
   asks you to set up or refresh the index. This skill is for lookups only.
